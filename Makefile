@@ -56,3 +56,11 @@ compose-up:
 .PHONY: compose-down
 compose-down:
 	$(COMPOSE_BASE_COMMAND) down
+
+.PHONY: sqlc-migrate
+sqlc-migrate:
+	migrate -path db/migration -database "$(DB_PROTOCOL)://$(DB_USER):$(DB_PASS)@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SQL_MODE)" -verbose up
+
+.PHONY: sqlc-generate
+sqlc-generate:
+	sqlc generate
