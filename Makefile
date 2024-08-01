@@ -68,3 +68,7 @@ db-migrate-down:
 .PHONY: sqlc-generate
 sqlc-generate:
 	sqlc generate
+
+.PHONY: test-run
+test-run:
+	go test -v -cover ./...
