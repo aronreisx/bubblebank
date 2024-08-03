@@ -72,3 +72,13 @@ sqlc-generate:
 .PHONY: test-run
 test-run:
 	go test -v -cover ./...
+
+.PHONY: test-coverage
+test-coverage:
+	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
+	go tool cover -func=./coverage/coverage.log
+
+.PHONY: test-coverage-html
+test-coverage-html:
+	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
+	go tool cover -html=./coverage/coverage.log
