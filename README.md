@@ -62,7 +62,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 For any questions or inquiries, please contact:
 
-- **Email:** support@bubblebank.com
+- **Email:** aronreis2@gmail.com
 - **GitHub Issues:** [GitHub Issues](https://github.com/aronreisx/bubblebank/issues)
 
 ---
