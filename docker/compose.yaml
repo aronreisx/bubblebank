@@ -8,7 +8,13 @@ services:
     ports:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./volumes/postgres/data:/var/lib/postgresql/data
+      - ./volumes/postgres/certs/postgresql-server.crt:/var/lib/postgresql/postgresql-server.crt
+      - ./volumes/postgres/certs/postgresql-server.key:/var/lib/postgresql/postgresql-server.key
+      - ./volumes/postgres/certs/internal-ca.crt:/var/lib/postgresql/internal-ca.crt
+      - ./volumes/postgres/certs/internal-ca.crl:/var/lib/postgresql/internal-ca.crl
+      - ./volumes/postgres/config/p_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./volumes/postgres/config/postgresql.conf:/etc/postgresql/postgresql.conf
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -21,4 +27,4 @@ services:
       - db
 
 volumes:
-  postgres-data:
+  data:

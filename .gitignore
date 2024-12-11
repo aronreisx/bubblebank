@@ -1,1 +1,4 @@
 */.env
+
+docker/volumes/postgres/certs/*
+!docker/volumes/postgres/certs/generate-certs.md
