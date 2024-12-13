@@ -31,6 +31,29 @@ func createRandomAccount(t *testing.T) Account {
 	return account
 }
 
+func TestAddAccountBalance(t *testing.T) {
+	account := createRandomAccount(t)
+
+	params := AddAccountBalanceParams{
+		Balance: util.RandomMoney(),
+		ID:      account.ID,
+	}
+
+	updatedAccount, err := testQueries.AddAccountBalance(context.Background(), params)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedAccount)
+
+	// Assert the account details remain the same, except the balance
+	require.Equal(t, account.ID, updatedAccount.ID)
+	require.Equal(t, account.Owner, updatedAccount.Owner)
+	require.Equal(t, account.Currency, updatedAccount.Currency)
+	require.WithinDuration(t, account.CreatedAt, updatedAccount.CreatedAt, time.Second)
+
+	// Assert the balance was updated correctly
+	require.Equal(t, account.Balance+params.Balance, updatedAccount.Balance)
+}
+
 func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }

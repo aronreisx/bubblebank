@@ -17,6 +17,11 @@ UPDATE accounts
 SET balance = $2
 WHERE id = $1
 RETURNING *;
+-- name: AddAccountBalance :one
+UPDATE accounts
+SET balance = balance + $1
+WHERE id = $2
+RETURNING *;
 -- name: DeleteAccount :exec
 DELETE FROM accounts
 WHERE id = $1;
