@@ -13,6 +13,7 @@ import (
 )
 
 var testQueries *Queries
+var testConnPool *pgxpool.Pool
 
 func init() {
 	err := godotenv.Load("../../env/.env")
@@ -22,12 +23,13 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
-	connPool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
+	var err error
 
+	testConnPool, err = pgxpool.New(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
 		log.Fatal("Cannot connect to database:", err)
 	}
 
-	testQueries = New(connPool)
+	testQueries = New(testConnPool)
 	os.Exit(m.Run())
 }

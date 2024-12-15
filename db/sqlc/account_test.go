@@ -35,8 +35,8 @@ func TestAddAccountBalance(t *testing.T) {
 	account := createRandomAccount(t)
 
 	params := AddAccountBalanceParams{
-		Balance: util.RandomMoney(),
-		ID:      account.ID,
+		Amount: util.RandomMoney(),
+		ID:     account.ID,
 	}
 
 	updatedAccount, err := testQueries.AddAccountBalance(context.Background(), params)
@@ -51,7 +51,7 @@ func TestAddAccountBalance(t *testing.T) {
 	require.WithinDuration(t, account.CreatedAt, updatedAccount.CreatedAt, time.Second)
 
 	// Assert the balance was updated correctly
-	require.Equal(t, account.Balance+params.Balance, updatedAccount.Balance)
+	require.Equal(t, account.Balance+params.Amount, updatedAccount.Balance)
 }
 
 func TestCreateAccount(t *testing.T) {
