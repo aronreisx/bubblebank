@@ -1,1 +1,27 @@
-*/.env
+# Environment file
+.env
+*.env
+
+# Go binaries
+/bin/
+/obj/
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.a
+*.out
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# Dependency directories
+/vendor/
+
+# Docker volumes
+/volumes/

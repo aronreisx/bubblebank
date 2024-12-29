@@ -1,84 +1,39 @@
-ifndef ENV
-	ENV_FILE_PATH = $(CURDIR)/env/.env
-	COMPOSE_FILE_PATH = $(CURDIR)/docker/compose.yaml
-else
-	ENV_FILE_PATH = $(CURDIR)/env/.env.$(ENV)
-	COMPOSE_FILE_PATH = $(CURDIR)/docker/compose.$(ENV).yaml
+ENV_FILE_PATH = $(CURDIR)/.env
+
+COMPOSE_BASE_COMMAND = docker-compose -p "$(PROJECT_NAME)"
+
+ifneq ($(wildcard $(ENV_FILE_PATH)),)
+	include $(ENV_FILE_PATH)
 endif
 
-include $(ENV_FILE_PATH)
+.PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
+ test-coverage test-coverage-html compose-up compose-down
 
-COMPOSE_BASE_COMMAND=docker-compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE_PATH) --env-file $(ENV_FILE_PATH)
+remove-volumes:
+	rm -rf volumes
 
-.PHONY: run-database
-run-database:
-	docker run -d \
-	--name $(DB_CONTAINER_NAME) \
-	-p $(DB_PORT):$(DB_PORT) \
-	-e PGDATA=/var/lib/postgresql/data/pgdata \
-	-e POSTGRES_USER=$(DB_USER) \
-	-e POSTGRES_PASSWORD=$(DB_PASS) \
-	-e POSTGRES_DB=$(DB_NAME) \
-	$(DB_TYPE):$(DB_VERSION)
-
-.PHONY: start-database
-start-database:
-	docker start $(DB_CONTAINER_NAME)
-
-.PHONY: stop-database
-stop-database:
-	docker stop $(DB_CONTAINER_NAME)
-
-.PHONY: logs-database
-logs-database:
-	docker logs $(DB_CONTAINER_NAME)
-
-.PHONY: restart-database
-restart-database:
-	docker restart $(DB_CONTAINER_NAME)
-
-.PHONY: database-bash
-database-bash:
-	docker exec -it $(DB_CONTAINER_NAME) bash
-
-.PHONY: remove-database
-remove-database:
-	docker rm -fv $(DB_CONTAINER_NAME)
-
-.PHONY: remove-modules
-remove-modules:
-	rm -rf node_modules
-
-.PHONY: compose-up
 compose-up:
 	$(COMPOSE_BASE_COMMAND) up -d
 
-.PHONY: compose-down
 compose-down:
 	$(COMPOSE_BASE_COMMAND) down
 
-.PHONY: db-migrate-up
 db-migrate-up:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up
 
-.PHONY: db-migrate-down
 db-migrate-down:
 	migrate -path db/migration -database "$(DB_URL)" -verbose down
 
-.PHONY: sqlc-generate
 sqlc-generate:
 	sqlc generate
 
-.PHONY: test-run
 test-run:
 	go test -v -cover ./...
 
-.PHONY: test-coverage
 test-coverage:
 	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
 	go tool cover -func=./coverage/coverage.log
 
-.PHONY: test-coverage-html
 test-coverage-html:
 	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
 	go tool cover -html=./coverage/coverage.log
