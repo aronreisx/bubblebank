@@ -25,3 +25,6 @@
 
 # Docker volumes
 /volumes/
+
+# GolangCI-Lint report
+report.xml

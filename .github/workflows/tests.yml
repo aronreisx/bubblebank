@@ -1,4 +1,4 @@
-name: Run TESTS workflow
+name: Run tests workflow
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   tests:
-    name: Run TESTS job
+    name: Run tests job
     runs-on: ubuntu-latest
     env:
       DB_IMAGE: ${{ secrets.DB_IMAGE }}
@@ -27,6 +27,11 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
 
       - name: Run tests
         run: make ci-test

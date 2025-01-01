@@ -1,0 +1,33 @@
+run:
+  timeout: 5m # Sets the maximum time for the linter to run.
+  modules-download-mode: readonly # Prevents downloading new modules; uses only those in 'go.mod'.
+
+linters:
+  enable:
+    - errcheck # Checks for unhandled errors in your code.
+    - goimports # Ensures proper formatting and import management.
+    - govet # Reports suspicious constructs, including struct alignment issues.
+    - staticcheck # Offers a comprehensive set of static analysis checks.
+
+issues:
+  exclude-use-default: false # Includes default issue exclusions.
+  max-issues-per-linter: 0 # No limit on the number of issues per linter.
+  max-same-issues: 0 # No limit on the number of identical issues.
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true # Reports unchecked type assertions.
+  govet:
+    enable:
+      - fieldalignment # Check memory padding
+  staticcheck:
+    checks: ["all"] # Enables all staticcheck analyzers.
+
+output:
+  formats:
+    - format: json
+      path: stderr
+    - format: checkstyle
+      path: report.xml
+    - format: colored-line-number
+  print-issued-lines: true # Shows the source line where the issue was found.
