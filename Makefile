@@ -1,13 +1,13 @@
 ENV_FILE_PATH = $(CURDIR)/.env
 
-COMPOSE_BASE_COMMAND = docker-compose -p "$(PROJECT_NAME)"
+COMPOSE_BASE_COMMAND = docker-compose -p "$(PROJECT_NAME)" --env-file $(ENV_FILE_PATH)
 
 ifneq ($(wildcard $(ENV_FILE_PATH)),)
 	include $(ENV_FILE_PATH)
 endif
 
 .PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
- test-coverage test-coverage-html compose-up compose-down
+ test-coverage test-coverage-html compose-up compose-down ci-test
 
 remove-volumes:
 	rm -rf volumes
@@ -26,6 +26,9 @@ db-migrate-down:
 
 sqlc-generate:
 	sqlc generate
+
+ci-test:
+	go test ./... -v -race # TODO: Add coverage
 
 test-run:
 	go test -v -cover ./...

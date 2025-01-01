@@ -6,30 +6,46 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aronreisx/bubblebank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
-
-	_ "github.com/lib/pq"
 )
 
-var testQueries *Queries
-var testConnPool *pgxpool.Pool
-
-func init() {
-	err := godotenv.Load("../../env/.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-}
+var (
+	testQueries  *Queries
+	testConnPool *pgxpool.Pool
+)
 
 func TestMain(m *testing.M) {
-	var err error
-
-	testConnPool, err = pgxpool.New(context.Background(), os.Getenv("DB_URL"))
+	config, err := util.LoadConfig("../../")
 	if err != nil {
-		log.Fatal("Cannot connect to database:", err)
+		log.Fatalf("Error during configuration loading: %v", err)
 	}
 
+	// Start the PostgreSQL container
+	dbContainer, dbURL, err := util.StartPostgresContainer(config)
+	if err != nil {
+		log.Fatalf("Could not start container: %v", err)
+	}
+	defer func() {
+		if err := dbContainer.Terminate(context.Background()); err != nil {
+			log.Fatalf("failed to terminate container: %v", err)
+		}
+	}()
+
+	// Run migrations
+	if err := util.RunMigrations(dbURL); err != nil {
+		log.Fatalf("Could not run migrations: %v", err)
+	}
+
+	// Create a connection pool
+	testConnPool, err = pgxpool.New(context.Background(), dbURL)
+	if err != nil {
+		log.Fatalf("Cannot connect to database: %v", err)
+	}
+
+	// Initialize test queries
 	testQueries = New(testConnPool)
+
+	// Run tests
 	os.Exit(m.Run())
 }

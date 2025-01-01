@@ -1,6 +1,6 @@
 services:
   db:
-    image: ${DB_TYPE}:${DB_VERSION}
+    image: ${DB_IMAGE}:${DB_VERSION}
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}

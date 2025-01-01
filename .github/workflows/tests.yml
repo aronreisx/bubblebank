@@ -1,0 +1,32 @@
+name: Run TESTS workflow
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  tests:
+    name: Run TESTS job
+    runs-on: ubuntu-latest
+    env:
+      DB_IMAGE: ${{ secrets.DB_IMAGE }}
+      DB_VERSION: ${{ secrets.DB_VERSION }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+
+    steps:
+      - name: Set up Go 1.23 or above
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.23
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: make ci-test
