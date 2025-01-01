@@ -1,23 +1,18 @@
 package util
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strings"
-	"time"
 )
-
-var r *rand.Rand
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-func init() {
-	r = rand.New(rand.NewSource((time.Now().UnixNano())))
-}
-
-// RandomInt generates a random integer between min and max
-func RandomInt(min, max int64) int64 {
-	return min + r.Int63n(max-min+1)
+// RandomInt generates a random integer between minVal and max
+func RandomInt(minVal, max int64) int64 {
+	n, _ := rand.Int(rand.Reader, big.NewInt(max-minVal+1))
+	return minVal + n.Int64()
 }
 
 // RandomString generates a random string of length n
@@ -26,8 +21,8 @@ func RandomString(n int) string {
 	k := len(alphabet)
 
 	for i := 0; i < n; i++ {
-		c := alphabet[r.Intn(k)]
-		sb.WriteByte(c)
+		c, _ := rand.Int(rand.Reader, big.NewInt(int64(k)))
+		sb.WriteByte(alphabet[c.Int64()])
 	}
 
 	return sb.String()
@@ -47,7 +42,8 @@ func RandomMoney() int64 {
 func RandomCurrency() string {
 	currencies := []string{"USD", "EUR", "CAD"}
 	n := len(currencies)
-	return currencies[r.Intn(n)]
+	index, _ := rand.Int(rand.Reader, big.NewInt(int64(n)))
+	return currencies[index.Int64()]
 }
 
 // RandomEmail generates a random email

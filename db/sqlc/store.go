@@ -45,7 +45,7 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 	return tx.Commit(ctx)
 }
 
-// TransferTxPrams contains the input parameters of the transfer transaction
+// TransferTxParams contains the input parameters of the transfer transaction
 type TransferTxParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
@@ -69,11 +69,7 @@ func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
-			FromAccountID: arg.FromAccountID,
-			ToAccountID:   arg.ToAccountID,
-			Amount:        arg.Amount,
-		})
+		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams(arg))
 		if err != nil {
 			return err
 		}
