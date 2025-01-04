@@ -7,7 +7,7 @@ ifneq ($(wildcard $(ENV_FILE_PATH)),)
 endif
 
 .PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
- test-coverage test-coverage-html compose-up compose-down ci-test
+ test-coverage test-coverage-html compose-up compose-down ci-test server
 
 remove-volumes:
 	rm -rf volumes
@@ -40,3 +40,6 @@ test-coverage:
 test-coverage-html:
 	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
 	go tool cover -html=./coverage/coverage.log
+
+server:
+	go run main.go
