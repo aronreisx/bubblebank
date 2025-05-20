@@ -30,12 +30,7 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	sqlStore, ok := store.(*db.SQLStore)
-	if !ok {
-		log.Fatalf("cannot convert store to *db.SQLStore")
-	}
-
-	server := api.NewServer(sqlStore)
+	server := api.NewServer(store)
 
 	err = server.Start(":" + config.ServerPort)
 	if err != nil {
