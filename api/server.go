@@ -15,6 +15,9 @@ type Server struct {
 func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
+	
+	// Set trusted proxies to nil to not trust any proxy
+	router.SetTrustedProxies(nil)
 
 	router.POST("/accounts", server.createAccount)
 	router.GET("/accounts/:id", server.getAccount)
