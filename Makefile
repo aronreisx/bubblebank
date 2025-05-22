@@ -7,7 +7,7 @@ ifneq ($(wildcard $(ENV_FILE_PATH)),)
 endif
 
 .PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
- test-coverage test-coverage-html compose-up compose-down ci-test server mock
+ test-coverage test-coverage-html compose-up compose-down ci-test server mock docker-build
 
 remove-volumes:
 	rm -rf volumes
@@ -46,3 +46,6 @@ server:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/aronreisx/bubblebank/db/sqlc Store
+
+docker-build:
+	docker build -t aronreis/bubblebank:latest .

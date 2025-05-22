@@ -10,13 +10,29 @@ services:
     volumes:
       - ./volumes/postgres-data:/var/lib/postgresql/data
 
+  bubblebank:
+    image: aronreis/bubblebank:latest
+    environment:
+      DB_IMAGE: ${DB_IMAGE}
+      DB_VERSION: ${DB_VERSION}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: db
+      SERVER_PORT: ${SERVER_PORT}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      - db
+
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-      - "${PGADMIN_PORT}:80" # Use port from environment variable
+      - "${PGADMIN_PORT}:80"
     depends_on:
       - db
 
