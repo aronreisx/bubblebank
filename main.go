@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 
 	api "github.com/aronreisx/bubblebank/api"
 	db "github.com/aronreisx/bubblebank/db/sqlc"
@@ -16,15 +17,31 @@ func main() {
 		log.Fatalf("cannot load config: %v", err)
 	}
 
-	dbSource := util.ConstructDBUrl(
+	// Print connection details for debugging
+	log.Printf("Connecting to PostgreSQL with Host: '%s', Port: '%s', User: '%s', Database: '%s'",
+		config.DBHost, config.DBPort, config.DBUser, config.DBName)
+
+	// Construct connection string with explicit parameters
+	connString := util.ConstructDBConnectionString(
 		config.DBUser,
 		config.DBPass,
-		"localhost",
+		config.DBHost,
 		config.DBPort,
 		config.DBName,
 	)
 
-	conn, err := pgxpool.New(context.Background(), dbSource)
+	// Parse the connection string into a pgxpool config
+	poolConfig, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		log.Fatalf("unable to parse config: %v\n", err)
+	}
+
+	// Force TCP connection by setting the dial function
+	poolConfig.ConnConfig.Config.DialFunc = (&net.Dialer{}).DialContext
+
+	// Create new connection pool with our custom configuration
+	conn, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
+
 	if err != nil {
 		log.Fatalf("cannot connect to db: %v", err)
 	}

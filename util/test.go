@@ -26,7 +26,7 @@ func StartPostgresContainer(config Config) (testcontainers.Container, string, er
 			"POSTGRES_DB":       config.DBName,
 		},
 		WaitingFor: wait.ForSQL(nat.Port(config.DBPort+"/tcp"), "pgx", func(host string, port nat.Port) string {
-			return ConstructDBUrl(config.DBUser, config.DBPass, host, port.Port(), config.DBName)
+			return ConstructDBConnectionString(config.DBUser, config.DBPass, host, port.Port(), config.DBName)
 		}).WithStartupTimeout(60 * time.Second),
 	}
 	dbContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -46,7 +46,7 @@ func StartPostgresContainer(config Config) (testcontainers.Container, string, er
 		return nil, "", err
 	}
 
-	dbURL := ConstructDBUrl(config.DBUser, config.DBPass, host, port.Port(), config.DBName)
+	dbURL := ConstructDBConnectionString(config.DBUser, config.DBPass, host, port.Port(), config.DBName)
 	return dbContainer, dbURL, nil
 }
 

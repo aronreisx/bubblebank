@@ -2,7 +2,6 @@ package util
 
 import (
 	"log"
-	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -17,6 +16,7 @@ type Config struct {
 	DBUser     string `mapstructure:"DB_USER"`
 	DBPass     string `mapstructure:"DB_PASS"`
 	DBName     string `mapstructure:"DB_NAME"`
+	DBHost     string `mapstructure:"DB_HOST"`
 	ServerPort string `mapstructure:"SERVER_PORT"`
 }
 
@@ -26,43 +26,49 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 
+	// Important: Set environment variable name mapping
+	viper.SetEnvPrefix("") // No prefix needed since env vars already have proper names
+
+	// List of environment variables to bind
+	envVars := []string{
+		"DB_IMAGE",
+		"DB_VERSION",
+		"DB_PORT",
+		"DB_USER",
+		"DB_PASS",
+		"DB_NAME",
+		"DB_HOST",
+		"SERVER_PORT",
+	}
+
+	// Map all environment variables to viper keys in a loop
+	for _, envVar := range envVars {
+		viper.BindEnv(envVar)
+	}
+
+	// Enable automatic environment variable lookup
 	viper.AutomaticEnv()
 
+	// New implementation
 	// Attempt to read the config file
 	if err = viper.ReadInConfig(); err != nil {
-		log.Printf("Config warning: %v. Falling back to environment variables.", err)
+		log.Printf("Config warning: %v. Using environment variables instead.", err)
+	}
 
-		// List of environment variables to set defaults for
-		envVars := []string{
-			"DB_IMAGE",
-			"DB_VERSION",
-			"DB_PORT",
-			"DB_USER",
-			"DB_PASS",
-			"DB_NAME",
-			"SERVER_PORT",
+	// Check for missing required variables
+	var missingVars []string
+	for _, envName := range envVars {
+		if viper.GetString(envName) == "" {
+			missingVars = append(missingVars, envName)
 		}
+	}
 
-		// Set default values from environment variables
-		var missingVars []string
-		for _, envName := range envVars {
-			osEnvVarValue := os.Getenv(envName)
-
-			// Check if any environment variables are missing
-			if osEnvVarValue == "" {
-				missingVars = append(missingVars, envName)
-			}
-
-			viper.SetDefault(envName, osEnvVarValue)
-		}
-
-		// Log missing environment variables
-		if len(missingVars) > 0 {
-			log.Printf(
-				"Config warning: Environment variables %v are missing.",
-				strings.Join(missingVars, ", "),
-			)
-		}
+	// Log missing environment variables
+	if len(missingVars) > 0 {
+		log.Printf(
+			"Config warning: Environment variables %v are missing or empty.",
+			strings.Join(missingVars, ", "),
+		)
 	}
 
 	// Unmarshal the config file or environment variables
