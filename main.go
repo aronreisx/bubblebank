@@ -29,7 +29,7 @@ func main() {
 		config.DBPort,
 		config.DBName,
 	)
-	
+
 	// Run database migrations
 	migrationsPath := "db/migration"
 	log.Printf("Running database migrations from %s", migrationsPath)
@@ -56,6 +56,11 @@ func main() {
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
 
+	// Mark server as ready after migrations complete
+	server.SetReady()
+	log.Println("Server is ready to receive traffic")
+
+	// Start the HTTP server
 	err = server.Start(":" + config.ServerPort)
 	if err != nil {
 		log.Fatalf("cannot start server: %v", err)
