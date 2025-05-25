@@ -7,7 +7,7 @@ ifneq ($(wildcard $(ENV_FILE_PATH)),)
 endif
 
 .PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
- test-coverage test-coverage-html compose-up compose-down ci-test server
+ test-coverage test-coverage-html compose-up compose-down ci-test server mock
 
 remove-volumes:
 	rm -rf volumes
@@ -43,3 +43,6 @@ test-coverage-html:
 
 server:
 	go run main.go
+
+mock:
+	mockgen -package mockdb -destination db/mock/store.go github.com/aronreisx/bubblebank/db/sqlc Store
