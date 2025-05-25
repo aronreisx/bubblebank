@@ -7,7 +7,8 @@ ifneq ($(wildcard $(ENV_FILE_PATH)),)
 endif
 
 .PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
- test-coverage test-coverage-html compose-up compose-down ci-test server mock docker-build
+ test-coverage test-coverage-html compose-up compose-down ci-test server mock \
+ docker-build db-migrate-status db-migration
 
 remove-volumes:
 	rm -rf volumes
@@ -19,10 +20,16 @@ compose-down:
 	$(COMPOSE_BASE_COMMAND) down
 
 db-migrate-up:
-	migrate -path db/migration -database "$(DB_URL)" -verbose up
+	goose -dir db/migration postgres "$(DB_URL)" up
 
 db-migrate-down:
-	migrate -path db/migration -database "$(DB_URL)" -verbose down
+	goose -dir db/migration postgres "$(DB_URL)" down
+
+db-migrate-status:
+	goose -dir db/migration postgres "$(DB_URL)" status
+
+db-migration:
+	goose -dir db/migration create $(name) sql
 
 sqlc-generate:
 	sqlc generate

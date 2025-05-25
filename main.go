@@ -29,6 +29,13 @@ func main() {
 		config.DBPort,
 		config.DBName,
 	)
+	
+	// Run database migrations
+	migrationsPath := "db/migration"
+	log.Printf("Running database migrations from %s", migrationsPath)
+	if err := util.RunDBMigration(migrationsPath, connString); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
 
 	// Parse the connection string into a pgxpool config
 	poolConfig, err := pgxpool.ParseConfig(connString)

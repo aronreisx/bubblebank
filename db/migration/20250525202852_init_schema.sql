@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS "accounts" (
   "id" bigserial PRIMARY KEY,
   "owner" varchar NOT NULL,
@@ -40,3 +42,11 @@ CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");
 COMMENT ON COLUMN "entries"."amount" IS 'Can be negative or positive';
 
 COMMENT ON COLUMN "transfers"."amount" IS 'Must be positive';
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE IF EXISTS entries;
+DROP TABLE IF EXISTS transfers;
+DROP TABLE IF EXISTS accounts;
+-- +goose StatementEnd
