@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	_ "github.com/aronreisx/bubblebank/db/migrations"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -12,9 +14,37 @@ import (
 
 // RunDBMigration runs database migrations using goose with in-code Go migrations
 func RunDBMigration(migrationPath string, dbURL string) error {
-	db, err := sql.Open("pgx", dbURL)
+	var db *sql.DB
+	var err error
+
+	log.Println("Attempting to connect to database for migrations...")
+	
+	maxRetries := 5
+	retryDelay := 3 * time.Second
+
+	for i := range maxRetries {
+		db, err = sql.Open("pgx", dbURL)
+		if err != nil {
+			log.Printf("Database connection attempt %d failed: %v", i+1, err)
+			time.Sleep(retryDelay)
+			continue
+		}
+
+		// Check if connection is actually working
+		err = db.Ping()
+		if err != nil {
+			log.Printf("Database ping attempt %d failed: %v", i+1, err)
+			db.Close()
+			time.Sleep(retryDelay)
+			continue
+		}
+
+		log.Printf("Successfully connected to database on attempt %d", i+1)
+		break
+	}
+
 	if err != nil {
-		return fmt.Errorf("failed to connect to database for migration: %w", err)
+		return fmt.Errorf("failed to connect to database after %d attempts: %w", maxRetries, err)
 	}
 	defer db.Close()
 
@@ -22,13 +52,23 @@ func RunDBMigration(migrationPath string, dbURL string) error {
 		return fmt.Errorf("failed to set dialect: %w", err)
 	}
 
-	// Since we're using Go-based migrations, we can run migrations directly without
-	// needing the physical migration files. The Go files from db/migrations are imported
-	// and registered with Goose when the program starts.
-	if err := goose.Up(db, ""); err != nil {
+	if migrationPath == "" || !directoryExists(migrationPath) {
+		migrationPath = "."
+		log.Printf("Using current directory for migrations as fallback since the migrations path was not provided")
+	}
+
+	if err := goose.Up(db, migrationPath); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
 	log.Println("DB migration completed successfully")
 	return nil
+}
+
+func directoryExists(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
 }

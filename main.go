@@ -34,7 +34,7 @@ func main() {
 
 	// Run database migrations using in-code Go migrations
 	log.Printf("Running database migrations")
-	if err := util.RunDBMigration("", connString); err != nil {
+	if err := util.RunDBMigration(config.MigrationsFolder, connString); err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}
 
@@ -57,11 +57,9 @@ func main() {
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
 
-	// Mark server as ready after migrations complete
 	server.SetReady()
 	log.Println("Server is ready to receive traffic")
 
-	// Start the HTTP server
 	err = server.Start(":" + config.ServerPort)
 	if err != nil {
 		log.Fatalf("cannot start server: %v", err)

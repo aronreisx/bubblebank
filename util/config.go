@@ -10,14 +10,15 @@ import (
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variables.
 type Config struct {
-	DBImage    string `mapstructure:"DB_IMAGE"`
-	DBVersion  string `mapstructure:"DB_VERSION"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPass     string `mapstructure:"DB_PASS"`
-	DBName     string `mapstructure:"DB_NAME"`
-	DBHost     string `mapstructure:"DB_HOST"`
-	ServerPort string `mapstructure:"SERVER_PORT"`
+	DBImage          string `mapstructure:"DB_IMAGE"`
+	DBVersion        string `mapstructure:"DB_VERSION"`
+	DBPort           string `mapstructure:"DB_PORT"`
+	DBUser           string `mapstructure:"DB_USER"`
+	DBPass           string `mapstructure:"DB_PASS"`
+	DBName           string `mapstructure:"DB_NAME"`
+	DBHost           string `mapstructure:"DB_HOST"`
+	ServerPort       string `mapstructure:"SERVER_PORT"`
+	MigrationsFolder string `mapstructure:"MIGRATIONS_FOLDER"`
 }
 
 // LoadConfig reads configuration from file or OS variables.
@@ -39,6 +40,7 @@ func LoadConfig(path string) (config Config, err error) {
 		"DB_NAME",
 		"DB_HOST",
 		"SERVER_PORT",
+		"MIGRATIONS_FOLDER",
 	}
 
 	// Map all environment variables to viper keys in a loop

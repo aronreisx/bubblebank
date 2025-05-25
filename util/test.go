@@ -63,10 +63,12 @@ func RunMigrations(dbURL string) error {
 		return fmt.Errorf("failed to set dialect: %w", err)
 	}
 
-	// Since we're using Go-based migrations, we can run migrations directly
-	// without needing the physical migration files. The Go files from db/migrations
-	// are imported and registered with Goose when the program starts.
-	if err := goose.Up(db, ""); err != nil {
+	// Even with Go-based migrations, Goose requires a valid directory path
+	// Use the current directory as a fallback, which should always exist
+	migrationsPath := "."
+
+	// Run migrations - this will execute the Go migrations registered at init time
+	if err := goose.Up(db, migrationsPath); err != nil {
 		return fmt.Errorf("failed to run test migrations: %w", err)
 	}
 
