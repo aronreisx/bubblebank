@@ -32,10 +32,9 @@ func main() {
 		config.DBName,
 	)
 
-	// Run database migrations
-	migrationsPath := "db/migrations"
-	log.Printf("Running database migrations from %s", migrationsPath)
-	if err := util.RunDBMigration(migrationsPath, connString); err != nil {
+	// Run database migrations using in-code Go migrations
+	log.Printf("Running database migrations")
+	if err := util.RunDBMigration("", connString); err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}
 

@@ -10,7 +10,7 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-// RunDBMigration runs database migrations using goose
+// RunDBMigration runs database migrations using goose with in-code Go migrations
 func RunDBMigration(migrationPath string, dbURL string) error {
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
@@ -22,11 +22,10 @@ func RunDBMigration(migrationPath string, dbURL string) error {
 		return fmt.Errorf("failed to set dialect: %w", err)
 	}
 
-	// Configure goose to use the migration directory
-	goose.SetBaseFS(nil) // Reset any previous FS setting
-
-	// Run migrations - this will run both SQL and Go migrations
-	if err := goose.Up(db, migrationPath); err != nil {
+	// Since we're using Go-based migrations, we can run migrations directly without
+	// needing the physical migration files. The Go files from db/migrations are imported
+	// and registered with Goose when the program starts.
+	if err := goose.Up(db, ""); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 

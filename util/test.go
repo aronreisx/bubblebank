@@ -50,7 +50,7 @@ func StartPostgresContainer(config Config) (testcontainers.Container, string, er
 	return dbContainer, dbURL, nil
 }
 
-// RunMigrations runs database migrations using Goose.
+// RunMigrations runs database migrations using Goose with in-code Go migrations.
 func RunMigrations(dbURL string) error {
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
@@ -63,12 +63,10 @@ func RunMigrations(dbURL string) error {
 		return fmt.Errorf("failed to set dialect: %w", err)
 	}
 
-	// Configure goose to use the migration directory
-	goose.SetBaseFS(nil) // Reset any previous FS setting
-
-	// Run migrations in test environment
-	migrationsPath := "../../db/migrations"
-	if err := goose.Up(db, migrationsPath); err != nil {
+	// Since we're using Go-based migrations, we can run migrations directly
+	// without needing the physical migration files. The Go files from db/migrations
+	// are imported and registered with Goose when the program starts.
+	if err := goose.Up(db, ""); err != nil {
 		return fmt.Errorf("failed to run test migrations: %w", err)
 	}
 
