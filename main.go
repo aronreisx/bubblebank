@@ -9,6 +9,8 @@ import (
 	db "github.com/aronreisx/bubblebank/db/sqlc"
 	"github.com/aronreisx/bubblebank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	_ "github.com/aronreisx/bubblebank/db/migrations"
 )
 
 func main() {
@@ -31,7 +33,7 @@ func main() {
 	)
 
 	// Run database migrations
-	migrationsPath := "db/migration"
+	migrationsPath := "db/migrations"
 	log.Printf("Running database migrations from %s", migrationsPath)
 	if err := util.RunDBMigration(migrationsPath, connString); err != nil {
 		log.Fatalf("migration failed: %v", err)

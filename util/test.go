@@ -3,13 +3,13 @@ package util
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
+	_ "github.com/aronreisx/bubblebank/db/migrations"
 	"github.com/docker/go-connections/nat"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file" // Required for migrations
-	_ "github.com/jackc/pgx/v5/stdlib"                   // Import the pgx driver
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -50,24 +50,27 @@ func StartPostgresContainer(config Config) (testcontainers.Container, string, er
 	return dbContainer, dbURL, nil
 }
 
-// RunMigrations runs database migrations using golang-migrate.
+// RunMigrations runs database migrations using Goose.
 func RunMigrations(dbURL string) error {
-	sqlDB, err := sql.Open("pgx", dbURL)
+	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to connect to database for test migration: %w", err)
 	}
-	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
-	if err != nil {
-		return err
+	defer db.Close()
+
+	// Set dialect for PostgreSQL
+	if err := goose.SetDialect("postgres"); err != nil {
+		return fmt.Errorf("failed to set dialect: %w", err)
 	}
-	migrateInstance, err := migrate.NewWithDatabaseInstance(
-		"file://../../db/migration",
-		"postgres", driver)
-	if err != nil {
-		return err
+
+	// Configure goose to use the migration directory
+	goose.SetBaseFS(nil) // Reset any previous FS setting
+
+	// Run migrations in test environment
+	migrationsPath := "../../db/migrations"
+	if err := goose.Up(db, migrationsPath); err != nil {
+		return fmt.Errorf("failed to run test migrations: %w", err)
 	}
-	if err := migrateInstance.Up(); err != nil && err != migrate.ErrNoChange {
-		return err
-	}
+
 	return nil
 }

@@ -20,16 +20,16 @@ compose-down:
 	$(COMPOSE_BASE_COMMAND) down
 
 db-migrate-up:
-	goose -dir db/migration postgres "$(DB_URL)" up
+	goose -dir db/migrations postgres "$(DB_URL)" up
 
 db-migrate-down:
-	goose -dir db/migration postgres "$(DB_URL)" down
+	goose -dir db/migrations postgres "$(DB_URL)" down
 
 db-migrate-status:
-	goose -dir db/migration postgres "$(DB_URL)" status
+	goose -dir db/migrations postgres "$(DB_URL)" status
 
 db-migration:
-	goose -dir db/migration create $(name) sql
+	goose -dir db/migrations create $(name) go
 
 sqlc-generate:
 	sqlc generate
