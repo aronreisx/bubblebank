@@ -8,7 +8,7 @@ endif
 
 .PHONY: remove-volumes db-migrate-up db-migrate-down sqlc-generate test-run \
  test-coverage test-coverage-html compose-up compose-down ci-test server mock \
- docker-build db-migrate-status db-migration
+ docker-build db-migrate-status db-migration lint-fix lint-check
 
 remove-volumes:
 	rm -rf volumes
@@ -56,3 +56,9 @@ mock:
 
 docker-build:
 	docker build -t aronreis/bubblebank:latest .
+
+lint-fix:
+	golangci-lint run --fix
+
+lint-check:
+	golangci-lint run --verbose
