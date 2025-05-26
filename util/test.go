@@ -45,5 +45,3 @@ func StartPostgresContainer(config Config) (testcontainers.Container, string, er
 	dbURL := ConstructDBConnectionString(config.DBUser, config.DBPass, host, port.Port(), config.DBName)
 	return dbContainer, dbURL, nil
 }
-
-

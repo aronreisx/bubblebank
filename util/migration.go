@@ -18,7 +18,7 @@ func RunDBMigration(migrationPath string, dbURL string) error {
 	var err error
 
 	log.Println("Attempting to connect to database for migrations...")
-	
+
 	maxRetries := 5
 	retryDelay := 3 * time.Second
 
@@ -34,7 +34,9 @@ func RunDBMigration(migrationPath string, dbURL string) error {
 		err = db.Ping()
 		if err != nil {
 			log.Printf("Database ping attempt %d failed: %v", i+1, err)
-			db.Close()
+			if err := db.Close(); err != nil {
+				log.Printf("Error closing database connection: %v", err)
+			}
 			time.Sleep(retryDelay)
 			continue
 		}
@@ -46,7 +48,11 @@ func RunDBMigration(migrationPath string, dbURL string) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to database after %d attempts: %w", maxRetries, err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("Error closing database connection: %v", err)
+		}
+	}()
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		return fmt.Errorf("failed to set dialect: %w", err)

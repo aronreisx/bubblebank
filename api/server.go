@@ -1,24 +1,28 @@
 package api
 
 import (
+	"log"
+
 	db "github.com/aronreisx/bubblebank/db/sqlc"
 	"github.com/gin-gonic/gin"
 )
 
 // Server serves HTTP requests for banking service
 type Server struct {
-	store       db.Store
-	router      *gin.Engine
-	isReady     bool // Tracks if migrations are complete
+	store   db.Store
+	router  *gin.Engine
+	isReady bool
 }
 
 // NewServer creates a new HTTP server and setup routing.
 func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
-	
+
 	// Set trusted proxies to nil to not trust any proxy
-	router.SetTrustedProxies(nil)
+	if err := router.SetTrustedProxies(nil); err != nil {
+		log.Printf("Warning: Failed to set trusted proxies: %v", err)
+	}
 
 	// Add health and readiness endpoints
 	router.GET("/health", server.healthCheck)
@@ -59,14 +63,14 @@ func (server *Server) healthCheck(ctx *gin.Context) {
 func (server *Server) readinessCheck(ctx *gin.Context) {
 	if server.isReady {
 		ctx.JSON(200, gin.H{
-			"status": "ready",
+			"status":     "ready",
 			"migrations": "complete",
 		})
 		return
 	}
 
 	ctx.JSON(503, gin.H{
-		"status": "not ready",
+		"status":     "not ready",
 		"migrations": "pending",
 	})
 }

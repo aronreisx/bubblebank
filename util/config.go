@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -45,7 +46,9 @@ func LoadConfig(path string) (config Config, err error) {
 
 	// Map all environment variables to viper keys in a loop
 	for _, envVar := range envVars {
-		viper.BindEnv(envVar)
+		if err := viper.BindEnv(envVar); err != nil {
+			return Config{}, fmt.Errorf("failed to bind environment variable %s: %w", envVar, err)
+		}
 	}
 
 	// Enable automatic environment variable lookup
