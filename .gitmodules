@@ -1,0 +1,3 @@
+[submodule "bruno"]
+	path = bruno
+	url = git@github.com:aronreisx/bubblebank-bruno.git
