@@ -55,7 +55,7 @@ mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/aronreisx/bubblebank/db/sqlc Store
 
 docker-build:
-	docker build -t aronreis/bubblebank:latest .
+	docker build -t $(CONTAINER_REGISTRY)/$(PROJECT_NAME):latest .
 
 lint-fix:
 	golangci-lint run --fix
