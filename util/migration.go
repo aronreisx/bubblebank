@@ -46,7 +46,8 @@ func RunDBMigration(migrationPath string, dbURL string) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to connect to database after %d attempts: %w", maxRetries, err)
+		log.Printf("Database connection failed after %d attempts: %v", maxRetries, err)
+		return fmt.Errorf("database connection unavailable")
 	}
 	defer func() {
 		if err := db.Close(); err != nil {

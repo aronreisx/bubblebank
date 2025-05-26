@@ -19,7 +19,6 @@ func main() {
 		log.Fatalf("cannot load config: %v", err)
 	}
 
-	// Print connection details for debugging
 	log.Printf("Connecting to PostgreSQL with Host: '%s', Port: '%s', User: '%s', Database: '%s'",
 		config.DBHost, config.DBPort, config.DBUser, config.DBName)
 
@@ -51,7 +50,8 @@ func main() {
 	conn, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 
 	if err != nil {
-		log.Fatalf("cannot connect to db: %v", err)
+		log.Printf("Database connection error: %v", err)
+		log.Fatalf("Database service unavailable")
 	}
 
 	store := db.NewStore(conn)
