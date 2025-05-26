@@ -2,14 +2,10 @@ package util
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
 	"time"
 
 	_ "github.com/aronreisx/bubblebank/db/migrations"
 	"github.com/docker/go-connections/nat"
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -50,27 +46,4 @@ func StartPostgresContainer(config Config) (testcontainers.Container, string, er
 	return dbContainer, dbURL, nil
 }
 
-// RunMigrations runs database migrations using Goose with in-code Go migrations.
-func RunMigrations(dbURL string) error {
-	db, err := sql.Open("pgx", dbURL)
-	if err != nil {
-		return fmt.Errorf("failed to connect to database for test migration: %w", err)
-	}
-	defer db.Close()
 
-	// Set dialect for PostgreSQL
-	if err := goose.SetDialect("postgres"); err != nil {
-		return fmt.Errorf("failed to set dialect: %w", err)
-	}
-
-	// Even with Go-based migrations, Goose requires a valid directory path
-	// Use the current directory as a fallback, which should always exist
-	migrationsPath := "."
-
-	// Run migrations - this will execute the Go migrations registered at init time
-	if err := goose.Up(db, migrationsPath); err != nil {
-		return fmt.Errorf("failed to run test migrations: %w", err)
-	}
-
-	return nil
-}
