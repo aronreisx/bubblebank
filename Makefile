@@ -1,5 +1,9 @@
 ENV_FILE_PATH = $(CURDIR)/.env
 
+COVERAGE_DIR ?= ./coverage
+MIGRATIONS_FOLDER ?= db/migrations
+IMAGE_TAG ?= $(shell git describe --tags --always --dirty)
+
 COMPOSE_BASE_COMMAND = docker-compose -p "$(PROJECT_NAME)" --env-file $(ENV_FILE_PATH)
 
 ifneq ($(wildcard $(ENV_FILE_PATH)),)
@@ -20,16 +24,16 @@ compose-down:
 	$(COMPOSE_BASE_COMMAND) down
 
 db-migrate-up:
-	goose -dir db/migrations postgres "$(DB_URL)" up
+	goose -dir $(MIGRATIONS_FOLDER) postgres "$(DB_URL)" up
 
 db-migrate-down:
-	goose -dir db/migrations postgres "$(DB_URL)" down
+	goose -dir $(MIGRATIONS_FOLDER) postgres "$(DB_URL)" down
 
 db-migrate-status:
-	goose -dir db/migrations postgres "$(DB_URL)" status
+	goose -dir $(MIGRATIONS_FOLDER) postgres "$(DB_URL)" status
 
 db-migration:
-	goose -dir db/migrations create $(name) go
+	goose -dir $(MIGRATIONS_FOLDER) create $(name) go
 
 sqlc-generate:
 	sqlc generate
@@ -40,13 +44,15 @@ ci-test:
 test-run:
 	go test -v -cover ./...
 
-test-coverage:
-	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
-	go tool cover -func=./coverage/coverage.log
+$(COVERAGE_DIR):
+	mkdir -p $(COVERAGE_DIR)
 
-test-coverage-html:
-	go test -v -cover ./... -coverprofile=./coverage/coverage.log; \
-	go tool cover -html=./coverage/coverage.log
+test-coverage: $(COVERAGE_DIR)
+	go test -v -cover ./... -coverprofile=$(COVERAGE_DIR)/coverage.log && \
+	go tool cover -func=$(COVERAGE_DIR)/coverage.log
+
+test-coverage-html: test-coverage
+	go tool cover -html=$(COVERAGE_DIR)/coverage.log
 
 server:
 	go run main.go
@@ -55,7 +61,7 @@ mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/aronreisx/bubblebank/db/sqlc Store
 
 docker-build:
-	docker build -t $(CONTAINER_REGISTRY)/$(PROJECT_NAME):latest .
+	docker build --cache-from $(CONTAINER_REGISTRY)/$(PROJECT_NAME):latest -t $(CONTAINER_REGISTRY)/$(PROJECT_NAME):latest -t $(CONTAINER_REGISTRY)/$(PROJECT_NAME):$(IMAGE_TAG) .
 
 lint-fix:
 	golangci-lint run --fix
