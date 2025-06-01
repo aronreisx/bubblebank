@@ -3,9 +3,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o main main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main main.go
 
-FROM alpine:3.19
+FROM gcr.io/distroless/static
 WORKDIR /root/
 COPY --from=builder /app/main .
 ENV DB_IMAGE=${DB_IMAGE} \
