@@ -2,10 +2,10 @@ package util
 
 import "fmt"
 
-// ConstructDBUrl constructs a database URL from the given parameters.
-func ConstructDBUrl(user, pass, host, port, dbName string) string {
+// ConstructDBConnectionString constructs a database connection string from the given parameters.
+func ConstructDBConnectionString(user, pass, host, port, dbName string) string {
+	// Construct a connection string with explicit parameters
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		user, pass, host, port, dbName,
-	)
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, pass, dbName)
 }

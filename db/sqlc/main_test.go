@@ -32,8 +32,7 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	// Run migrations
-	if err := util.RunMigrations(dbURL); err != nil {
+	if err := util.RunDBMigration(config.MigrationsFolder, dbURL); err != nil {
 		log.Fatalf("Could not run migrations: %v", err)
 	}
 

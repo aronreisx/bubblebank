@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+/bin
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Docker related
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Project specific
+/tmp
+README.md
+*.md
+Makefile
+volumes
+bruno
+.github
+
+# Test files (if not needed in the image)
+*_test.go
+/test
+/testing
+
+# Local development/environment files
+*.local
+.env.local
+.env.development
+
+# Dependency directories (if they're recreated during build)
+/vendor/
+
+# Database files
+*.db
+*.sqlite

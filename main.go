@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 
 	api "github.com/aronreisx/bubblebank/api"
 	db "github.com/aronreisx/bubblebank/db/sqlc"
 	"github.com/aronreisx/bubblebank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	_ "github.com/aronreisx/bubblebank/db/migrations"
 )
 
 func main() {
@@ -16,21 +19,46 @@ func main() {
 		log.Fatalf("cannot load config: %v", err)
 	}
 
-	dbSource := util.ConstructDBUrl(
+	log.Printf("Connecting to PostgreSQL with Host: '%s', Port: '%s', User: '%s', Database: '%s'",
+		config.DBHost, config.DBPort, config.DBUser, config.DBName)
+
+	// Construct connection string with explicit parameters
+	connString := util.ConstructDBConnectionString(
 		config.DBUser,
 		config.DBPass,
-		"localhost",
+		config.DBHost,
 		config.DBPort,
 		config.DBName,
 	)
 
-	conn, err := pgxpool.New(context.Background(), dbSource)
+	// Run database migrations using in-code Go migrations
+	log.Printf("Running database migrations")
+	if err := util.RunDBMigration(config.MigrationsFolder, connString); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
+	// Parse the connection string into a pgxpool config
+	poolConfig, err := pgxpool.ParseConfig(connString)
 	if err != nil {
-		log.Fatalf("cannot connect to db: %v", err)
+		log.Fatalf("unable to parse config: %v\n", err)
+	}
+
+	// Force TCP connection by setting the dial function
+	poolConfig.ConnConfig.Config.DialFunc = (&net.Dialer{}).DialContext
+
+	// Create new connection pool with our custom configuration
+	conn, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
+
+	if err != nil {
+		log.Printf("Database connection error: %v", err)
+		log.Fatalf("Database service unavailable")
 	}
 
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
+
+	server.SetReady()
+	log.Println("Server is ready to receive traffic")
 
 	err = server.Start(":" + config.ServerPort)
 	if err != nil {
