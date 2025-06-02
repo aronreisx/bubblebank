@@ -3,6 +3,7 @@ ENV_FILE_PATH = $(CURDIR)/.env
 COVERAGE_DIR ?= ./coverage
 MIGRATIONS_FOLDER ?= db/migrations
 IMAGE_TAG ?= $(shell git describe --tags --always --dirty)
+DB_URL ?= postgres://$(DB_USER):$(DB_PASS)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
 
 COMPOSE_BASE_COMMAND = docker-compose -p "$(PROJECT_NAME)" --env-file $(ENV_FILE_PATH)
 
