@@ -18,6 +18,8 @@ jobs:
   scan:
     name: Container Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.event_name == 'pull_request'
 
     steps:
@@ -76,6 +78,9 @@ jobs:
   build:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     if: github.event_name == 'push'
 
     steps:
