@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bubblebank.fullname" . }}
+  labels:
+    {{- include "bubblebank.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "bubblebank.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "bubblebank.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.application.repository }}:{{ .Values.application.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: {{ .Values.application.serverPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "bubblebank.fullname" . }}-config
+            - secretRef:
+                name: {{ include "bubblebank.fullname" . }}-db-credentials
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
