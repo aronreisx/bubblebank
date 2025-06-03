@@ -89,4 +89,4 @@ else
 fi
 echo ""
 
-argocd-autopilot repo bootstrap --recover --app "${GIT_REPO}/bootstrap/argo-cd"
+argocd-autopilot repo bootstrap --recover --app "${GIT_REPO}/infra/argocd/bootstrap/argo-cd"

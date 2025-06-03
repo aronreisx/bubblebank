@@ -28,3 +28,7 @@
 
 # GolangCI-Lint report
 report.xml
+
+# Helm
+infra/helm/charts/*
+infra/helm/Chart.lock
