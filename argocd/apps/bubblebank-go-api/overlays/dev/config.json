@@ -1,0 +1,11 @@
+{
+  "appName": "bubblebank-go-api",
+  "userGivenName": "bubblebank-go-api",
+  "destNamespace": "default",
+  "destServer": "https://kubernetes.default.svc",
+  "srcPath": "apps/bubblebank-go-api/overlays/dev",
+  "srcRepoURL": "https://github.com/aronreisx/bubblebank-argocd.git",
+  "srcTargetRevision": "",
+  "labels": null,
+  "annotations": null
+}
