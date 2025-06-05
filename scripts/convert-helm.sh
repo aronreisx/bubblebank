@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p ./k8s
+mkdir -p ./k8s/bubblebank
 
-helm dependency build ./helm
-helm template bubblebank ./helm > ./k8s/manifests.yaml
+helm dependency build ./helm/bubblebank
+helm template bubblebank ./helm/bubblebank > ./k8s/bubblebank/manifests.yaml
