@@ -40,7 +40,8 @@ echo "Kind cluster created successfully!"
 echo ""
 
 echo "Step 2: Installing NGINX Ingress Controller..."
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+helm dependency update infra/helm/nginx-ingress
+helm install nginx-ingress infra/helm/nginx-ingress --create-namespace --namespace ingress-nginx
 
 echo "Waiting for ingress controller to be ready..."
 
@@ -89,4 +90,4 @@ else
 fi
 echo ""
 
-argocd-autopilot repo bootstrap --recover --app "${GIT_REPO}/infra/argocd/bootstrap/argo-cd"
+# argocd-autopilot repo bootstrap --recover --app "${GIT_REPO}/infra/argocd/bootstrap/argo-cd"
