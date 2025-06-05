@@ -1,0 +1,22 @@
+apiVersion: v2
+name: vault-injector
+description: HashiCorp Vault Agent Injector for BubbleBank
+version: 0.1.0
+appVersion: "1.15.2"
+type: application
+
+dependencies:
+- name: vault
+  version: "0.27.0"
+  repository: "https://helm.releases.hashicorp.com"
+  condition: vault.enabled
+
+maintainers:
+- name: BubbleBank Team
+  email: team@bubblebank.local
+
+keywords:
+- vault
+- secrets
+- injection
+- security
