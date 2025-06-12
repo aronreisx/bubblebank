@@ -5,7 +5,7 @@ vault:
   # Injector configuration
   injector:
     enabled: true
-    externalVaultAddr: "https://host.docker.internal:8200"
+    externalVaultAddr: "http://host.docker.internal:8200"
     authPath: "auth/kubernetes"
 
     # Environment variables

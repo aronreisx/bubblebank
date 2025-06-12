@@ -21,9 +21,15 @@ TOKEN_REVIEW_JWT=$(kubectl create token vault-auth --duration=8760h)
 # Get the Kubernetes CA certificate
 KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' | base64 --decode)
 
-# Set the Vault address and CA certificate
-export VAULT_ADDR="https://localhost:8200"
-export VAULT_CACERT="$(pwd)/tls/vault-ca.crt"
+# Set to true for HTTPS, false for HTTP
+USE_HTTPS=false
+
+if [ "$USE_HTTPS" = true ]; then
+  export VAULT_ADDR="https://localhost:8200"
+  export VAULT_CACERT="$(pwd)/tls/vault-ca.crt"
+else
+  export VAULT_ADDR="http://localhost:8200"
+fi
 
 # Unseal the Vault server
 vault operator unseal $(jq -r '.unseal_keys_b64[0]' init.json)
@@ -88,6 +94,15 @@ vault list auth/kubernetes/role
 # Check the specific role
 vault read auth/kubernetes/role/bubblebank
 
+# ============================================
+# Step 5: Enable Secrets Engine and Set Secrets
+# Enable the KV secrets engine at the path "secret"
+vault secrets enable -path=secret kv-v2
+
+# Set secrets for the BubbleBank application
+vault kv put secret/bubblebank/database host="bubblebank-postgresql" port="5432" name="bubblebank" username="thor" password="ragnarok"
+vault kv put secret/bubblebank/api api_key="test-api-key-123" secret_key="test-secret-key-456"
+vault kv put secret/bubblebank/api api_key="test-api-key-123" secret_key="test-secret-key-456"
 
 # ============================================
 # Test Authentication from Kind Cluster
