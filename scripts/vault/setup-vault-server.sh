@@ -1,6 +1,30 @@
 #!/bin/bash
 
-# THE TEST IS FAILING IN THIS FILE
+cat > vault.hcl <<EOF
+# ===================================
+# Vault Local "Prod-Like" Configuration
+# ===================================
+
+storage "file" {
+  path = "./data"
+}
+
+listener "tcp" {
+  address       = "0.0.0.0:8200"
+  tls_disable = true
+}
+
+ui = true
+
+# Disable mlock on dev machine (but note: in real prod, you WANT mlock)
+disable_mlock = true
+
+# Enable Kubernetes auth method at startup (optional: can enable later via CLI)
+mount "kubernetes" { type = "kubernetes" }
+
+EOF
+
+nohup vault server -config=vault.hcl > /dev/null 2>&1 &
 
 # ============================================
 # Step 1: Configure the Kubernetes Auth Method
@@ -30,6 +54,8 @@ if [ "$USE_HTTPS" = true ]; then
 else
   export VAULT_ADDR="http://localhost:8200"
 fi
+
+vault operator init -key-shares=1 -key-threshold=1 -format=json > init.json
 
 # Unseal the Vault server
 vault operator unseal $(jq -r '.unseal_keys_b64[0]' init.json)
