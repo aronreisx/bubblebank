@@ -20,6 +20,17 @@ type Config struct {
 	DBHost           string `mapstructure:"DB_HOST"`
 	ServerPort       string `mapstructure:"SERVER_PORT"`
 	MigrationsFolder string `mapstructure:"MIGRATIONS_FOLDER"`
+
+	// OpenTelemetry Configuration
+	OtelServiceName          string `mapstructure:"OTEL_SERVICE_NAME"`
+	OtelServiceVersion       string `mapstructure:"OTEL_SERVICE_VERSION"`
+	OtelEnvironment          string `mapstructure:"OTEL_ENVIRONMENT"`
+	OtelExporterOtlpEndpoint string `mapstructure:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+
+	// Observability Configuration
+	PrometheusEndpoint string `mapstructure:"PROMETHEUS_ENDPOINT"`
+	MetricsPort        string `mapstructure:"METRICS_PORT"`
+	LogLevel           string `mapstructure:"LOG_LEVEL"`
 }
 
 // LoadConfig reads configuration from file or OS variables.
@@ -42,6 +53,15 @@ func LoadConfig(path string) (config Config, err error) {
 		"DB_HOST",
 		"SERVER_PORT",
 		"MIGRATIONS_FOLDER",
+		// OpenTelemetry
+		"OTEL_SERVICE_NAME",
+		"OTEL_SERVICE_VERSION",
+		"OTEL_ENVIRONMENT",
+		"OTEL_EXPORTER_OTLP_ENDPOINT",
+		// Observability
+		"PROMETHEUS_ENDPOINT",
+		"METRICS_PORT",
+		"LOG_LEVEL",
 	}
 
 	// Map all environment variables to viper keys in a loop
