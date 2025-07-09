@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Kill previous vault server if running
+pkill "vault"
+
+# Clean up previous files
+rm -rf ./tls
+rm -rf ./data
+rm -rf ./init.json
+rm -rf ./vault.hcl
+
 cat > vault.hcl <<EOF
 # ===================================
 # Vault Local "Prod-Like" Configuration
@@ -36,8 +45,8 @@ kubectl create serviceaccount vault-auth -n default
 
 # Create ClusterRoleBinding for token review
 kubectl create clusterrolebinding vault-auth-binding \
-    --clusterrole=system:auth-delegator \
-    --serviceaccount=default:vault-auth
+--clusterrole=system:auth-delegator \
+--serviceaccount=default:vault-auth
 
 # Get the JWT token (long-lived)
 TOKEN_REVIEW_JWT=$(kubectl create token vault-auth --duration=8760h)
@@ -49,10 +58,10 @@ KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clust
 USE_HTTPS=false
 
 if [ "$USE_HTTPS" = true ]; then
-  export VAULT_ADDR="https://localhost:8200"
-  export VAULT_CACERT="$(pwd)/tls/vault-ca.crt"
+    export VAULT_ADDR="https://localhost:8200"
+    export VAULT_CACERT="$(pwd)/tls/vault-ca.crt"
 else
-  export VAULT_ADDR="http://localhost:8200"
+    export VAULT_ADDR="http://localhost:8200"
 fi
 
 vault operator init -key-shares=1 -key-threshold=1 -format=json > init.json
@@ -71,9 +80,9 @@ vault auth enable kubernetes
 
 # Configure Vault with your Kind cluster details
 vault write auth/kubernetes/config \
-    token_reviewer_jwt="$TOKEN_REVIEW_JWT" \
-    kubernetes_host="$KUBE_HOST" \
-    kubernetes_ca_cert="$KUBE_CA_CERT"
+token_reviewer_jwt="$TOKEN_REVIEW_JWT" \
+kubernetes_host="$KUBE_HOST" \
+kubernetes_ca_cert="$KUBE_CA_CERT"
 
 # ============================================
 # Step 2: Create a Policy
@@ -103,11 +112,11 @@ EOF
 # Step 3: Create the Kubernetes Auth Role
 # Create a role that binds service accounts to the policy
 vault write auth/kubernetes/role/bubblebank \
-    bound_service_account_names=default \
-    bound_service_account_namespaces=default \
-    policies=bubblebank-policy \
-    ttl=24h \
-    max_ttl=24h
+bound_service_account_names=default \
+bound_service_account_namespaces=default \
+policies=bubblebank-policy \
+ttl=24h \
+max_ttl=24h
 
 # ============================================
 # Step 4: Verify the Configuration

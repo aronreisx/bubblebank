@@ -34,8 +34,8 @@ infra/helm/*/charts/*
 infra/helm/*/Chart.lock
 
 # Vault
-infra/vault/tls/*
-infra/vault/data/*
-infra/vault/vault.hcl
-infra/vault/init.json
-infra/vault/vault.log
+scripts/vault/tls/*
+scripts/vault/data/*
+scripts/vault/vault.hcl
+scripts/vault/init.json
+scripts/vault/vault.log
