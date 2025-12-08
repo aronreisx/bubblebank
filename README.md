@@ -1,70 +1,91 @@
 # Bubblebank
 
-Bubblebank is a showcase project currently under construction.
+Minimal banking API in Go with PostgreSQL, SQLC, and in-code Goose migrations. Production-friendly container image and CI/CD with linting and security scans.
 
-## Table of Contents
+## Features
 
-- [Bubblebank](#bubblebank)
-- [Description](#description)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- Health and readiness: `GET /health`, `GET /ready` (ready after migrations)
+- Accounts API:
+  - `POST /accounts` create account (`owner`, `currency=USD|EUR`)
+  - `GET /accounts/:id` fetch account by id
+  - `GET /accounts?page_id=&page_size=` paginated list
+- Transactional money transfer implemented in store layer (`TransferTx`)—not exposed via HTTP yet
+- Typed data access generated with SQLC (`accounts`, `entries`, `transfers`)
 
-## Description
-
-Bubblebank is a project developed in Go (Golang) to demonstrate the capabilities of the language in building a simple banking application.
-
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Go 1.16 or higher
+- Go `1.24+` (toolchain pinned via `mise.toml`)
+- PostgreSQL (local or via Docker)
 
-### Installation
+### Configure
 
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/aronreisx/bubblebank.git
-   ```
-2. Navigate to the project directory:
-   ```sh
-   cd bubblebank
-   ```
+1. Copy `.env.example` to `.env` and set variables:
+   - `DB_IMAGE`, `DB_VERSION`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`
+   - `DB_HOST` (e.g., `localhost` or `db` when using compose)
+   - `SERVER_PORT` (e.g., `8080`)
+   - `MIGRATIONS_FOLDER` (default `db/migrations`)
 
-## Usage
+### Run
 
-To run the project:
-```sh
-go run main.go
-```
+- Local server (migrations run automatically):
+  ```sh
+  make server
+  ```
+- Optional: start Postgres + pgAdmin via Docker Compose (requires `.env`):
+  ```sh
+  make compose-up
+  ```
 
-## Contributing
+## API Summary
 
-We welcome contributions to improve Bubblebank. To contribute, please follow these steps:
+- `POST /accounts`
+  ```sh
+  curl -X POST http://localhost:$SERVER_PORT/accounts \
+    -H 'Content-Type: application/json' \
+    -d '{"owner":"alice","currency":"USD"}'
+  ```
+- `GET /accounts/:id`
+  ```sh
+  curl http://localhost:$SERVER_PORT/accounts/1
+  ```
+- `GET /accounts?page_id=1&page_size=5`
+  ```sh
+  curl 'http://localhost:$SERVER_PORT/accounts?page_id=1&page_size=5'
+  ```
+- `GET /health` and `GET /ready`
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/functionality-name`).
-3. Make your changes and commit them (`git commit -m 'feat: add an awesome functionality'`).
-4. Push to the branch (`git push origin feature/functionality-name`).
-5. Open a pull request.
+## Development
 
-Please ensure your code adheres to our coding standards and includes appropriate tests.
+- Generate SQLC code: `make sqlc-generate`
+- Create migration: `make db-migration name=<migration_name>`
+- Apply migrations (CLI): `make db-migrate-up` / `make db-migrate-down`
+- Lint: `make lint-check` (fix with `make lint-fix`)
+- Tests: `make test-run`
+
+## Architecture
+
+- `api/` Gin HTTP server and handlers
+- `db/sqlc/` SQLC-generated queries, models, and transactional store (`TransferTx`)
+- `db/migrations/` in-code Goose migrations
+- `util/` configuration, migrations runner, random test data, testcontainers helpers
+
+## Non-Functional
+
+- Readiness gating via `SetReady()` after migrations
+- Distroless, non-root runtime image
+- Static analysis: `golangci-lint` (`errcheck`, `goimports`, `govet`, `staticcheck`)
+- Security: `gosec` for code, `trivy` for images
+- Tests use `testcontainers` (requires proper DB env variables)
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE)
 
 ## Contact
 
-For any questions or inquiries, please contact:
+- Email: `aronreis2@gmail.com`
+- Issues: https://github.com/aronreisx/bubblebank/issues
 
-- **Email:** aronreis2@gmail.com
-- **GitHub Issues:** [GitHub Issues](https://github.com/aronreisx/bubblebank/issues)
-
----
-
-*Note: This project is still under construction and may not be functional by the time you see it.*
+Note: Transfers and entries are implemented in the store layer but have no HTTP endpoints yet.
